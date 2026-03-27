@@ -41,24 +41,25 @@ function getDistance(lat1, lon1, lat2, lon2) {
 }
 
 app.post('/api/location', (req, res) => {
-    const { vehicleId, latitude, longitude } = req.body;
-    const distance = getDistance(parseFloat(latitude), parseFloat(longitude), targetLat, targetLng);
-    
-    // Geo-Fence Logic (500 meters)
-    const isWithinFence = distance <= 500;
+    const { vehicleId, latitude, longitude, signalId, distance } = req.body;
 
-    console.log(`📡 [INBOUND] Vehicle: ${vehicleId} | Dist: ${distance.toFixed(2)}m`);
-    
-    if (isWithinFence) {
-        console.log(`🟢 [SIGNAL] ${TEAM_NAME} TRIGGER: FORCE GREEN LIGHT`);
+    // 1. Only log if an actual Emergency Override is happening
+    if (signalId) {
+        console.log(`=============================================`);
+        console.log(`🚨 ALERT: EMERGENCY OVERRIDE ACTIVE`);
+        console.log(`📍 JUNCTION: ${signalId}`);
+        console.log(`📏 DISTANCE: ${distance.toFixed(2)}m`);
+        console.log(`🚑 VEHICLE: ${vehicleId}`);
+        console.log(`=============================================`);
+    } else {
+        // Just a quiet heartbeat for normal tracking
+        process.stdout.write("."); 
     }
 
     res.json({
         success: true,
-        team: TEAM_NAME,
-        distance: distance.toFixed(2),
-        overrideTriggered: isWithinFence,
-        rights: "Proprietary Technology - Dev Verma"
+        activeSignal: signalId || "None",
+        rights: "Proprietary Technology - Team Geo_Fencers"
     });
 });
 
