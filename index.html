@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geo-Fencers: Emergency Tracker</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* The map takes up the whole screen */
+        #map {
+            height: 100vh;
+            width: 100vw;
+            z-index: 1; /* Puts the map in the background */
+        }
+
+        /* The floating control panel */
+        .control-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(45, 45, 45, 0.95);
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            z-index: 1000; /* Puts the panel on top of the map */
+            color: #ffffff;
+            backdrop-filter: blur(5px);
+        }
+
+        h2 { color: #ff4757; margin-top: 0; font-size: 1.5em; }
+        
+        .data-box {
+            background-color: #1e1e1e;
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.1em;
+            color: #2ed573;
+        }
+
+        button {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+        
+        button:hover { background-color: #ff6b81; }
+        button.active { background-color: #ffa502; }
+        #status { margin-top: 15px; font-size: 0.9em; color: #a4b0be; }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="control-panel">
+    <h2>🚑 Emergency Override</h2>
+    <div class="data-box">
+        Lat: <span id="lat">0.000000</span><br>
+        Lng: <span id="lng">0.000000</span>
+    </div>
+    <button id="toggleBtn" onclick="toggleTracking()">Start Broadcasting</button>
+    <div id="status">System Standby.</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // --- MAP INITIALIZATION ---
+    // Initialize map centered on Bhopal
+    let map = L.map('map').setView([23.2599, 77.4126], 13);
+    
+    // Add the street map tiles
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap Geo-Fencers'
+    }).addTo(map);
+
+    // Add a marker for the ambulance
+    let ambulanceMarker = L.marker([23.2599, 77.4126]).addTo(map);
+    // --------------------------
+
+    let watchId = null;
+    let isTracking = false;
+    const API_URL = "http://localhost:3000/api/location"; 
+
+    function toggleTracking() {
+        const btn = document.getElementById('toggleBtn');
+        const status = document.getElementById('status');
+
+        if (!isTracking) {
+            if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition(sendLocation, handleError, {
+                    enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 5000
+                });
+                isTracking = true;
+                btn.innerText = "Stop Broadcasting";
+                btn.classList.add("active");
+                status.innerText = "Transmitting live coordinates...";
+                status.style.color = "#2ed573";
+            } else {
+                status.innerText = "Geolocation is not supported.";
+                status.style.color = "#ff4757";
+            }
+        } else {
+            navigator.geolocation.clearWatch(watchId);
+            isTracking = false;
+            btn.innerText = "Start Broadcasting";
+            btn.classList.remove("active");
+            status.innerText = "System Standby.";
+            status.style.color = "#a4b0be";
+        }
+    }
+
+    function sendLocation(position) {
+        const lat = position.coords.latitude.toFixed(6);
+        const lng = position.coords.longitude.toFixed(6);
+
+        // Update the UI text
+        document.getElementById('lat').innerText = lat;
+        document.getElementById('lng').innerText = lng;
+
+        // --- UPDATE THE MAP ---
+        // Move the marker to the new live location
+        ambulanceMarker.setLatLng([lat, lng]);
+        // Pan the camera to follow the ambulance
+        map.panTo([lat, lng]);
+        // ----------------------
+
+        const payload = {
+            vehicleId: "AMB-01",
+            latitude: lat,
+            longitude: lng,
+            timestamp: new Date().toISOString()
+        };
+
+        // Send to backend
+        fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        }).then(response => {
+            console.log("Server received data.");
+        }).catch(error => {
+            console.error("Backend not reachable yet.");
+        });
+    }
+
+    function handleError(error) {
+        document.getElementById('status').innerText = "Error: " + error.message;
+    }
+</script>
+
+</body>
+</html>

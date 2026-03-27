@@ -1,0 +1,56 @@
+int greenLight = 8;
+int yellowLight = 9;
+int redLight = 10;
+
+bool overrideActive = false;
+unsigned long overrideStartTime = 0;
+const long overrideDuration = 10000; // Hold green for 10 seconds after ambulance clears
+
+void setup() {
+  pinMode(greenLight, OUTPUT);
+  pinMode(yellowLight, OUTPUT);
+  pinMode(redLight, OUTPUT);
+  
+  // Start listening to the USB connection at 9600 baud rate
+  Serial.begin(9600); 
+}
+
+void loop() {
+  // Check if the server is sending an override command via USB
+  if (Serial.available() > 0) {
+    char command = Serial.read();
+    if (command == 'G') {
+      overrideActive = true;
+      overrideStartTime = millis(); // Start the override timer
+    }
+  }
+
+  if (overrideActive) {
+    // 🚨 AMBULANCE INCOMING: FORCE GREEN 🚨
+    digitalWrite(redLight, LOW);
+    digitalWrite(yellowLight, LOW);
+    digitalWrite(greenLight, HIGH);
+
+    // Check if the 10-second safety window has passed
+    if (millis() - overrideStartTime >= overrideDuration) {
+      overrideActive = false; // Turn off override and go back to normal
+    }
+  } else {
+    // 🚦 NORMAL TRAFFIC LIGHT CYCLE 🚦
+    // Green for 5 seconds
+    digitalWrite(redLight, LOW);
+    digitalWrite(yellowLight, LOW);
+    digitalWrite(greenLight, HIGH);
+    delay(5000); 
+
+    // Yellow for 2 seconds
+    digitalWrite(greenLight, LOW);
+    digitalWrite(yellowLight, HIGH);
+    delay(2000);
+
+    // Red for 5 seconds
+    digitalWrite(yellowLight, LOW);
+    digitalWrite(redLight, HIGH);
+    delay(5000);
+  }
+}
