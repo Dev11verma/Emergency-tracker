@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geo-Fencers: Emergency Tracker</title>
+    <title>Geo-Fencers Official | Emergency Response</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -12,97 +12,152 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #000;
         }
         
-        /* The map takes up the whole screen */
         #map {
             height: 100vh;
             width: 100vw;
-            z-index: 1; /* Puts the map in the background */
+            z-index: 1;
         }
 
-        /* The floating control panel */
+        /* --- OFFICIAL BRANDING HEADER --- */
+        .brand-header {
+            position: absolute;
+            top: 25px;
+            left: 20px;
+            z-index: 1001;
+            background: rgba(18, 18, 18, 0.85);
+            padding: 12px 25px;
+            border-left: 5px solid #ff4757;
+            border-radius: 6px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        .brand-header h1 {
+            margin: 0;
+            font-size: 1.3em;
+            letter-spacing: 1.5px;
+            color: #ffffff;
+            text-transform: uppercase;
+        }
+
+        .brand-header p {
+            margin: 0;
+            font-size: 0.85em;
+            color: #2ed573;
+            font-weight: bold;
+        }
+
+        /* --- CONTROL PANEL --- */
         .control-panel {
             position: absolute;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: rgba(45, 45, 45, 0.95);
-            padding: 20px 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            background-color: rgba(28, 28, 28, 0.95);
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.8);
             width: 90%;
             max-width: 400px;
             text-align: center;
-            z-index: 1000; /* Puts the panel on top of the map */
+            z-index: 1000;
             color: #ffffff;
-            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px);
         }
 
-        h2 { color: #ff4757; margin-top: 0; font-size: 1.5em; }
+        h2 { color: #ff4757; margin: 0 0 15px 0; font-size: 1.4em; letter-spacing: 1px; }
         
         .data-box {
-            background-color: #1e1e1e;
-            padding: 10px;
-            margin: 15px 0;
-            border-radius: 8px;
-            font-family: monospace;
+            background-color: rgba(0,0,0,0.4);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', Courier, monospace;
             font-size: 1.1em;
             color: #2ed573;
+            border: 1px solid rgba(46, 213, 115, 0.15);
         }
 
         button {
-            background-color: #ff4757;
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 18px;
             font-size: 1.1em;
-            font-weight: bold;
-            border-radius: 8px;
+            font-weight: 800;
+            border-radius: 12px;
             cursor: pointer;
             width: 100%;
-            transition: 0.3s;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 20px rgba(255, 71, 87, 0.3);
+            text-transform: uppercase;
         }
         
-        button:hover { background-color: #ff6b81; }
-        button.active { background-color: #ffa502; }
-        #status { margin-top: 15px; font-size: 0.9em; color: #a4b0be; }
+        button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255, 71, 87, 0.5); }
+        button.active { background: #ffa502; box-shadow: 0 5px 20px rgba(255, 165, 2, 0.3); }
+
+        #status { margin-top: 15px; font-size: 0.9em; color: #a4b0be; font-weight: 500; }
+
+        /* --- INVESTOR RIGHTS FOOTER --- */
+        .footer-rights {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.75em;
+            color: #747d8c;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
 
+<div class="brand-header">
+    <h1>Team Geo_Fencers</h1>
+    <p>Project Lead: Dev Verma</p>
+</div>
+
 <div id="map"></div>
 
 <div class="control-panel">
-    <h2>🚑 Emergency Override</h2>
+    <h2>🚑 EMERGENCY OVERRIDE</h2>
     <div class="data-box">
-        Lat: <span id="lat">0.000000</span><br>
-        Lng: <span id="lng">0.000000</span>
+        LAT: <span id="lat">0.000000</span><br>
+        LNG: <span id="lng">0.000000</span>
     </div>
     <button id="toggleBtn" onclick="toggleTracking()">Start Broadcasting</button>
-    <div id="status">System Standby.</div>
+    <div id="status">System Encrypted. Awaiting Uplink.</div>
+
+    <div class="footer-rights">
+        © 2026 Team Geo_Fencers. All Rights Reserved.<br>
+        <strong>Official Proprietary Technology - Dev Verma</strong><br>
+        Unauthorized replication is strictly prohibited.
+    </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // --- MAP INITIALIZATION ---
-    // Initialize map centered on Bhopal
-    let map = L.map('map').setView([23.2599, 77.4126], 13);
+    // Initialize map on Bhopal coordinates
+    let map = L.map('map').setView([23.1915, 77.3529], 15);
     
-    // Add the street map tiles
+    // Using Dark Mode CartoDB tiles for the pro look
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
-        attribution: '© OpenStreetMap Geo-Fencers'
+        attribution: '© Geo_Fencers Internal Data'
     }).addTo(map);
 
-    // Add a marker for the ambulance
-    let ambulanceMarker = L.marker([23.2599, 77.4126]).addTo(map);
-    // --------------------------
+    // Initial marker placement
+    let ambulanceMarker = L.marker([23.1915, 77.3529]).addTo(map);
 
     let watchId = null;
     let isTracking = false;
+    
+    // YOUR LIVE RENDER BACKEND URL
     const API_URL = "https://emergency-tracker-qqz2.onrender.com/api/location"; 
 
     function toggleTracking() {
@@ -119,10 +174,10 @@
                 isTracking = true;
                 btn.innerText = "Stop Broadcasting";
                 btn.classList.add("active");
-                status.innerText = "Transmitting live coordinates...";
+                status.innerText = "LIVE UPLINK ACTIVE: Transmitting coordinates...";
                 status.style.color = "#2ed573";
             } else {
-                status.innerText = "Geolocation is not supported.";
+                status.innerText = "GPS Error: Not supported by device.";
                 status.style.color = "#ff4757";
             }
         } else {
@@ -130,7 +185,7 @@
             isTracking = false;
             btn.innerText = "Start Broadcasting";
             btn.classList.remove("active");
-            status.innerText = "System Standby.";
+            status.innerText = "System Encrypted. Awaiting Uplink.";
             status.style.color = "#a4b0be";
         }
     }
@@ -139,16 +194,13 @@
         const lat = position.coords.latitude.toFixed(6);
         const lng = position.coords.longitude.toFixed(6);
 
-        // Update the UI text
+        // Update Dashboard Text
         document.getElementById('lat').innerText = lat;
         document.getElementById('lng').innerText = lng;
 
-        // --- UPDATE THE MAP ---
-        // Move the marker to the new live location
+        // Update Map Marker & Camera
         ambulanceMarker.setLatLng([lat, lng]);
-        // Pan the camera to follow the ambulance
         map.panTo([lat, lng]);
-        // ----------------------
 
         const payload = {
             vehicleId: "AMB-01",
@@ -157,20 +209,21 @@
             timestamp: new Date().toISOString()
         };
 
-        // Send to backend
+        // Forwarding to Render Cloud
         fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         }).then(response => {
-            console.log("Server received data.");
+            console.log("Cloud handshake successful.");
         }).catch(error => {
-            console.error("Backend not reachable yet.");
+            console.error("Cloud handshake failed.");
         });
     }
 
     function handleError(error) {
-        document.getElementById('status').innerText = "Error: " + error.message;
+        document.getElementById('status').innerText = "Signal Interference: " + error.message;
+        document.getElementById('status').style.color = "#ffa502";
     }
 </script>
 
