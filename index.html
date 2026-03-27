@@ -22,7 +22,6 @@
             z-index: 1;
         }
 
-        /* --- OFFICIAL BRANDING HEADER --- */
         .brand-header {
             position: absolute;
             top: 25px;
@@ -51,7 +50,6 @@
             font-weight: bold;
         }
 
-        /* --- CONTROL PANEL --- */
         .control-panel {
             position: absolute;
             bottom: 30px;
@@ -103,7 +101,6 @@
 
         #status { margin-top: 15px; font-size: 0.9em; color: #a4b0be; font-weight: 500; }
 
-        /* --- INVESTOR RIGHTS FOOTER --- */
         .footer-rights {
             margin-top: 25px;
             padding-top: 15px;
@@ -142,22 +139,96 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // Initialize map on Bhopal coordinates
-    let map = L.map('map').setView([23.1915, 77.3529], 15);
+    // 1. Initialize map on Bhopal (Zoom 12 shows the whole grid)
+    let map = L.map('map').setView([23.2300, 77.4100], 12);
     
-    // Using Dark Mode CartoDB tiles for the pro look
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
         attribution: '© Geo_Fencers Internal Data'
     }).addTo(map);
 
-    // Initial marker placement
-    let ambulanceMarker = L.marker([23.1915, 77.3529]).addTo(map);
+    // 2. THE BHOPAL MEGA-GRID DATA (Top 50 Intersections)
+    const trafficSignals = [
+        // --- NORTH BHOPAL ---
+        { id: "SIG-01", name: "Raja Bhoj Airport Crossing", lat: 23.2875, lng: 77.3450 },
+        { id: "SIG-02", name: "Gandhi Nagar Tiraha", lat: 23.2950, lng: 77.3320 },
+        { id: "SIG-03", name: "Karond Square", lat: 23.2985, lng: 77.4080 },
+        { id: "SIG-04", name: "Bhanpur Bridge", lat: 23.2910, lng: 77.4250 },
+        { id: "SIG-05", name: "Chola Naka", lat: 23.2780, lng: 77.4020 },
+        // --- WEST BHOPAL ---
+        { id: "SIG-06", name: "Bairagarh Main Market", lat: 23.2450, lng: 77.2950 },
+        { id: "SIG-07", name: "Lalghati Square", lat: 23.2655, lng: 77.3620 },
+        { id: "SIG-08", name: "VIP Road Entrance", lat: 23.2580, lng: 77.3820 },
+        { id: "SIG-09", name: "Retghat Crossing", lat: 23.2550, lng: 77.3920 },
+        { id: "SIG-10", name: "Royal Market", lat: 23.2615, lng: 77.3995 },
+        // --- CENTRAL BHOPAL ---
+        { id: "SIG-11", name: "Bhopal Junction (P1)", lat: 23.2695, lng: 77.4105 },
+        { id: "SIG-12", name: "Nadra Bus Stand", lat: 23.2645, lng: 77.4050 },
+        { id: "SIG-13", name: "Alpana Tiraha", lat: 23.2620, lng: 77.4080 },
+        { id: "SIG-14", name: "Hamidia Hospital Gate", lat: 23.2590, lng: 77.3950 },
+        { id: "SIG-15", name: "Imami Gate", lat: 23.2585, lng: 77.3980 },
+        { id: "SIG-16", name: "Peergate Crossing", lat: 23.2565, lng: 77.4020 },
+        { id: "SIG-17", name: "Budhwara Square", lat: 23.2520, lng: 77.4085 },
+        { id: "SIG-18", name: "Itwara Road", lat: 23.2545, lng: 77.4140 },
+        { id: "SIG-19", name: "Lily Talkies Crossing", lat: 23.2485, lng: 77.4120 },
+        { id: "SIG-20", name: "Jahangirabad Chouraha", lat: 23.2430, lng: 77.4160 },
+        // --- NEW BHOPAL ---
+        { id: "SIG-21", name: "Roshanpura Square", lat: 23.2435, lng: 77.4045 },
+        { id: "SIG-22", name: "Board Office Square", lat: 23.2325, lng: 77.4335 },
+        { id: "SIG-23", name: "MP Nagar Zone-1", lat: 23.2312, lng: 77.4320 },
+        { id: "SIG-24", name: "MP Nagar Zone-2", lat: 23.2345, lng: 77.4350 },
+        { id: "SIG-25", name: "Jyoti Talkies Square", lat: 23.2365, lng: 77.4340 },
+        { id: "SIG-26", name: "Cheetak Bridge", lat: 23.2395, lng: 77.4380 },
+        { id: "SIG-27", name: "Prabhat Petrol Pump", lat: 23.2455, lng: 77.4420 },
+        { id: "SIG-28", name: "Govindpura Gate", lat: 23.2480, lng: 77.4520 },
+        { id: "SIG-29", name: "Indrapuri C-Sector", lat: 23.2510, lng: 77.4650 },
+        { id: "SIG-30", name: "BHEL Dussehra Maidan", lat: 23.2380, lng: 77.4620 },
+        // --- SOUTH BHOPAL ---
+        { id: "SIG-31", name: "Rani Kamlapati Station", lat: 23.2215, lng: 77.4385 },
+        { id: "SIG-32", name: "Habibganj Naka", lat: 23.2145, lng: 77.4425 },
+        { id: "SIG-33", name: "Mansarovar Complex", lat: 23.2280, lng: 77.4350 },
+        { id: "SIG-34", name: "Bittan Market Square", lat: 23.2160, lng: 77.4310 },
+        { id: "SIG-35", name: "11 No. Stop", lat: 23.2085, lng: 77.4290 },
+        { id: "SIG-36", name: "7 No. Stop", lat: 23.2185, lng: 77.4245 },
+        { id: "SIG-37", name: "Gulmohar Crossing", lat: 23.1985, lng: 77.4380 },
+        { id: "SIG-38", name: "Chuna Bhatti Square", lat: 23.1955, lng: 77.4125 },
+        { id: "SIG-39", name: "Kolar Road Tiraha", lat: 23.1895, lng: 77.4080 },
+        { id: "SIG-40", name: "Misrod Main Road", lat: 23.1750, lng: 77.4620 },
+        // --- EAST & OUTER ---
+        { id: "SIG-41", name: "ISBT Main Crossing", lat: 23.2205, lng: 77.4520 },
+        { id: "SIG-42", name: "Ayodhya Nagar Bypass", lat: 23.2585, lng: 77.4850 },
+        { id: "SIG-43", name: "Piplani Petrol Pump", lat: 23.2485, lng: 77.4720 },
+        { id: "SIG-44", name: "Anand Nagar", lat: 23.2515, lng: 77.4980 },
+        { id: "SIG-45", name: "Awadhpuri Crossing", lat: 23.2180, lng: 77.4850 },
+        { id: "SIG-46", name: "Ratibad Tiraha", lat: 23.1850, lng: 77.3450 },
+        { id: "SIG-47", name: "Bhadbhada Road", lat: 23.2180, lng: 77.3750 },
+        { id: "SIG-48", name: "Link Road 1 Entrance", lat: 23.2355, lng: 77.4120 },
+        { id: "SIG-49", name: "Link Road 3 Crossing", lat: 23.2120, lng: 77.4180 },
+        { id: "SIG-50", name: "Vidisha Road Bypass", lat: 23.3150, lng: 77.4450 }
+    ];
 
+    // 3. Draw the Grid on the Map
+    trafficSignals.forEach(sig => {
+        // Visual Fence Circle
+        sig.circle = L.circle([sig.lat, sig.lng], {
+            color: '#ff4757',
+            fillColor: '#ff4757',
+            fillOpacity: 0.1,
+            radius: 500
+        }).addTo(map);
+
+        // Signal Node Marker
+        L.circleMarker([sig.lat, sig.lng], {
+            radius: 5,
+            fillColor: "#ff4757",
+            color: "#fff",
+            weight: 1
+        }).addTo(map).bindPopup(`<b>${sig.name}</b><br>ID: ${sig.id}`);
+    });
+
+    let ambulanceMarker = L.marker([23.2300, 77.4100]).addTo(map);
     let watchId = null;
     let isTracking = false;
-    
-    // YOUR LIVE RENDER BACKEND URL
     const API_URL = "https://emergency-tracker-qqz2.onrender.com/api/location"; 
 
     function toggleTracking() {
@@ -174,11 +245,8 @@
                 isTracking = true;
                 btn.innerText = "Stop Broadcasting";
                 btn.classList.add("active");
-                status.innerText = "LIVE UPLINK ACTIVE: Transmitting coordinates...";
+                status.innerText = "GRID UPLINK ACTIVE...";
                 status.style.color = "#2ed573";
-            } else {
-                status.innerText = "GPS Error: Not supported by device.";
-                status.style.color = "#ff4757";
             }
         } else {
             navigator.geolocation.clearWatch(watchId);
@@ -191,41 +259,53 @@
     }
 
     function sendLocation(position) {
-        const lat = position.coords.latitude.toFixed(6);
-        const lng = position.coords.longitude.toFixed(6);
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const status = document.getElementById('status');
 
-        // Update Dashboard Text
-        document.getElementById('lat').innerText = lat;
-        document.getElementById('lng').innerText = lng;
+        document.getElementById('lat').innerText = lat.toFixed(6);
+        document.getElementById('lng').innerText = lng.toFixed(6);
 
-        // Update Map Marker & Camera
         ambulanceMarker.setLatLng([lat, lng]);
-        map.panTo([lat, lng]);
+        
+        let activeSignal = null;
+        let minDistance = Infinity;
 
-        const payload = {
-            vehicleId: "AMB-01",
-            latitude: lat,
-            longitude: lng,
-            timestamp: new Date().toISOString()
-        };
+        // CHECK AGAINST ALL 50 NODES
+        trafficSignals.forEach(sig => {
+            const dist = map.distance([lat, lng], [sig.lat, sig.lng]);
+            
+            if (dist <= 500) {
+                sig.circle.setStyle({color: '#2ed573', fillColor: '#2ed573'});
+                activeSignal = sig;
+                if(dist < minDistance) minDistance = dist;
+            } else {
+                sig.circle.setStyle({color: '#ff4757', fillColor: '#ff4757'});
+            }
+        });
 
-        // Forwarding to Render Cloud
+        if (activeSignal) {
+            status.innerText = `🚨 OVERRIDE: ${activeSignal.name} ACTIVE`;
+            status.style.color = "#2ed573";
+        }
+
+        // Broadcast to Render
         fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        }).then(response => {
-            console.log("Cloud handshake successful.");
-        }).catch(error => {
-            console.error("Cloud handshake failed.");
+            body: JSON.stringify({
+                vehicleId: "AMB-01",
+                latitude: lat,
+                longitude: lng,
+                signalId: activeSignal ? activeSignal.id : null,
+                distance: activeSignal ? minDistance : null
+            })
         });
     }
 
     function handleError(error) {
-        document.getElementById('status').innerText = "Signal Interference: " + error.message;
-        document.getElementById('status').style.color = "#ffa502";
+        document.getElementById('status').innerText = "Signal Loss: " + error.message;
     }
 </script>
-
 </body>
 </html>
