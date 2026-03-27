@@ -1,63 +1,73 @@
 const express = require('express');
 const cors = require('cors');
-
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// --- THE TRAFFIC LIGHT DATA ---
-// A dummy traffic light set just a few hundred meters from your current location
-const TARGET_LIGHT_LAT = 23.192500; 
-const TARGET_LIGHT_LNG = 77.353500;
-const GEO_FENCE_RADIUS = 500; // 500 meters
+// --- INVESTOR-READY BRANDING ---
+const TEAM_NAME = "TEAM GEO_FENCERS";
+const LEAD = "DEV VERMA";
+const VERSION = "1.0.0-PROPRIETARY";
 
-// --- THE MATH: Haversine Formula ---
-function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // Earth's radius in meters
+const printSplash = () => {
+    console.log("====================================================");
+    console.log(`🚀 ${TEAM_NAME} | CENTRAL INTELLIGENCE NODE`);
+    console.log(`👤 PROJECT LEAD: ${LEAD}`);
+    console.log(`🛡️  SYSTEM STATUS: ${VERSION}`);
+    console.log("====================================================");
+    console.log("⚠️  AUTHORIZED ACCESS ONLY - ENCRYPTION ACTIVE");
+    console.log("----------------------------------------------------\n");
+};
+
+// Traffic Light Coordinates (Bhopal Location)
+const targetLat = 23.1915;
+const targetLng = 77.3529;
+
+// Haversine Formula for precise distance calculation
+function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Earth radius in meters
     const phi1 = lat1 * Math.PI / 180;
     const phi2 = lat2 * Math.PI / 180;
-    const deltaPhi = (lat2 - lat1) * Math.PI / 180;
-    const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+    const dPhi = (lat2 - lat1) * Math.PI / 180;
+    const dLambda = (lon2 - lon1) * Math.PI / 180;
 
-    const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+    const a = Math.sin(dPhi / 2) * Math.sin(dPhi / 2) +
               Math.cos(phi1) * Math.cos(phi2) *
-              Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+              Math.sin(dLambda / 2) * Math.sin(dLambda / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c; // Returns distance in meters
+    return R * c; // Distance in meters
 }
 
-// --- THE MAIN API ENDPOINT ---
 app.post('/api/location', (req, res) => {
-    const { vehicleId, latitude, longitude, timestamp } = req.body;
-
-    // 1. Calculate the distance
-    const distanceToLight = calculateDistance(latitude, longitude, TARGET_LIGHT_LAT, TARGET_LIGHT_LNG);
+    const { vehicleId, latitude, longitude } = req.body;
+    const distance = getDistance(parseFloat(latitude), parseFloat(longitude), targetLat, targetLng);
     
-    console.log(`\n📡 [UPDATE] Vehicle: ${vehicleId} | Lat: ${latitude}, Lng: ${longitude}`);
-    console.log(`📏 Distance to next traffic light: ${Math.round(distanceToLight)} meters`);
+    // Geo-Fence Logic (500 meters)
+    const isWithinFence = distance <= 500;
 
-    // 2. The Geo-Fence Logic
-    let triggerHardware = false;
+    console.log(`📡 [INBOUND] Vehicle: ${vehicleId} | Dist: ${distance.toFixed(2)}m`);
     
-    if (distanceToLight <= GEO_FENCE_RADIUS) {
-        console.log(`🚨 [GEO-FENCE BREACHED] Ambulance within ${GEO_FENCE_RADIUS}m!`);
-        console.log(`🟢 SENDING INTERRUPT TO ARDUINO: FORCE GREEN LIGHT!`);
-        triggerHardware = true;
-    } else {
-        console.log(`🚦 Ambulance outside radius. Normal traffic cycle continues.`);
+    if (isWithinFence) {
+        console.log(`🟢 [SIGNAL] ${TEAM_NAME} TRIGGER: FORCE GREEN LIGHT`);
     }
 
-    // 3. Send response back to the browser
-    res.status(200).json({ 
-        message: "Data processed", 
-        distance: Math.round(distanceToLight),
-        overrideTriggered: triggerHardware
+    res.json({
+        success: true,
+        team: TEAM_NAME,
+        distance: distance.toFixed(2),
+        overrideTriggered: isWithinFence,
+        rights: "Proprietary Technology - Dev Verma"
     });
 });
 
+app.get('/', (req, res) => {
+    res.send(`${TEAM_NAME} API Service is Live. Managed by ${LEAD}.`);
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ Smart Geo-Fencing Server running on port ${PORT}`);
+    printSplash();
+    console.log(`✅ Cloud Node Active on Port: ${PORT}`);
 });
